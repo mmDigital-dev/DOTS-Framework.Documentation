@@ -23,6 +23,7 @@
 * [Supported Data Types](#supported-data-types)
 * [Data Access (Getter / Setter API)](#data-access-getter--setter-api)
 * [Performance Guidelines](#performance-guidelines)
+* [Roadmap](#roadmap)
 
 ---
 
@@ -103,7 +104,7 @@ The framework automates the boilerplate for Templates and LinkedObjects through 
 * **Framework Compilation** The master switch. Enables or disables the entire code generation system.
 * **Auto Compilation** Automatically triggers a recompile when changes are detected in your scripts.
   *Requires "Framework Compilation" to be active.*
-* **Recompile** Force-cleans the cache and triggers a fresh compilation. Use this if your IDE (VS/Rider) doesn't recognize newly added LinkedObject fields.
+* **Recompile** Force-cleans the cache and triggers a fresh compilation.
 * **Clear** Wipes all generated files and resets the internal framework state.
 
 ---
@@ -299,8 +300,8 @@ Every query is defined as a `static void` method. The framework automatically de
 public static void PlayerMovement(
     ref EntityID entityID,                                              // Metadata (contains SubID and TemplateID)
     ref LocalTransform transform,                                       // Standard DOTS component (Read/Write)
-    [LinkedObject("PlayerData")] ref LinkedObjectData playerData,       // Read-only global data (Burst-compatible)
-    [LinkedObject("DeltaTime", true)] ref LinkedObjectData deltaTime    // Read-only deltaTime
+    [LinkedObject("PlayerData")] ref LinkedObject playerData,       // Read-only global data (Burst-compatible)
+    [LinkedObject("DeltaTime", true)] ref LinkedObject deltaTime    // Read-only deltaTime
 )
 {
     // Access DOTS components directly
@@ -539,7 +540,35 @@ You may bypass Getter/Setter by directly accessing generated fields.
 ```csharp
 playerData.Get(out FixedString128Bytes skillName, "Skills.Name", new FixedList64Bytes<int>() {0}); 
 
-playerData.Skills[0].Name; //⚠️Only valid with generated code
+playerData.Data.Skills[0].Name; //⚠️Only valid with generated code
 ```
 
 You also can look into the generated files yourself to see what happens.
+
+Here is the updated **Roadmap** section, redesigned to match the professional, structured, and clear style of the rest of your README. I have clarified technical points (like "Unique Query Parameters") and categorized the tasks for better scannability.
+
+---
+
+## Roadmap
+
+The framework is under active development. Future updates will focus on performance overhead reduction, developer experience (DX), and extending the type system.
+
+### 🚀 Performance & Core Engine
+
+* **ReadOnly Optimization**: Refine the internal dependency graph to better leverage `ReadOnly` parameters for even higher query concurrency.
+* **Custom Struct Registration**: Allow users to register custom unmanaged structs (like float3) to be treated as "Direct Access" types within LinkedObjects, bypassing generic overhead.
+* **Entity Type Support**: Add support for the `Entity` type as a query parameter to allow direct referencing outside the framework.
+* **Refined Execution Ordering**: Implement a priority system (e.g., `[UpdateTemplate(Order = 10)]`) to allow manual control over the scheduling sequence when logic depends on specific execution flow.
+
+### 🛠️ Developer Experience (DX)
+* **Configurable String Sizes**: Add a project-wide setting to customize the default size of FixedString types (e.g., switching from 128 to 64 or 512 bytes) via the Editor menu.
+* **Framework Info Menu**: A new Editor window to visualize which fields are currently visible to the generator and how you can access them in the LinkedObject.
+* **Code Analyzer**: Integrated analyzers to provide feedback (warnings/suggestions) on framework related code.
+* **Automatic Access Generator**: A tool to automatically generates your code between the safe **Getter/Setter API** and the high-performance **Direct Access** mode for generated fields.
+* **Enhanced Documentation**: Detailed technical deep-dives into the code-generation logic.
+
+### 🧪 Stability & Compatibility
+
+* **EntityBuilder V2**: Rewrite the experimental `EntityBuilder` to fully support Physics components and improve performance and compability.
+* **Common Query Parameters**: Add built-in support for common global variables (like `DeltaTime`) as native query parameters without requiring manual LinkedObject setup.
+* **Unit Testing Suite**: Implement a comprehensive test runner to validate generated code integrity.
